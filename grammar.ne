@@ -36,14 +36,15 @@ comment -> "#" text {% d => d[0] + d[1] %}
 _ -> wschar:* {% function(d) {return null;} %}
 wschar -> [ \t] {% id %}
  
-transText -> transChar transRest {% d => d[0] + d[1].join("") %}
+transText -> char transRest {% d => d[0] + d[1].join("") %}
 transRest -> transChar:* {% id %}
 
 transChar -> [^\n\t\v\f#] {% id %} # for translation text. may not contain #
 
 text -> textChar:* {% d => d[0].join("") %} #for comments text. may contain spaces and tabs
 textChar -> [^\n\v\f] {% id %}
-key -> char:+ {% d => d[0].join("") %} # for key may not have spaces or whitespace
+key -> keychar:+ {% d => d[0].join("") %} # for key may not have spaces or whitespace
+keychar -> [a-zA-Z0-9_] {% id %}
 char -> [^\n\t\v\f ] {% id %}
 
 

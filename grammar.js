@@ -150,7 +150,7 @@ var grammar = {
     {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", "wschar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": function(d) {return null;}},
     {"name": "wschar", "symbols": [/[ \t]/], "postprocess": id},
-    {"name": "transText", "symbols": ["transChar", "transRest"], "postprocess": d => d[0] + d[1].join("")},
+    {"name": "transText", "symbols": ["char", "transRest"], "postprocess": d => d[0] + d[1].join("")},
     {"name": "transRest$ebnf$1", "symbols": []},
     {"name": "transRest$ebnf$1", "symbols": ["transRest$ebnf$1", "transChar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "transRest", "symbols": ["transRest$ebnf$1"], "postprocess": id},
@@ -159,9 +159,10 @@ var grammar = {
     {"name": "text$ebnf$1", "symbols": ["text$ebnf$1", "textChar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "text", "symbols": ["text$ebnf$1"], "postprocess": d => d[0].join("")},
     {"name": "textChar", "symbols": [/[^\n\v\f]/], "postprocess": id},
-    {"name": "key$ebnf$1", "symbols": ["char"]},
-    {"name": "key$ebnf$1", "symbols": ["key$ebnf$1", "char"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "key$ebnf$1", "symbols": ["keychar"]},
+    {"name": "key$ebnf$1", "symbols": ["key$ebnf$1", "keychar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "key", "symbols": ["key$ebnf$1"], "postprocess": d => d[0].join("")},
+    {"name": "keychar", "symbols": [/[a-zA-Z0-9_]/], "postprocess": id},
     {"name": "char", "symbols": [/[^\n\t\v\f ]/], "postprocess": id}
 ]
   , ParserStart: "properties"
