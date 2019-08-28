@@ -25,19 +25,6 @@ function $(o) {
 }
 
 
-function commentType(d){
-    return {
-        lineType: "comment",
-        text: d[1]
-    }
-}
-function assignmentType(d){
-    return {
-        lineType: "assignment",
-        key: d[0],
-        text: d[2]
-    }
-}
 function assingmentdefType(d){
     return {
         lineType: "assignmentdef",
@@ -135,36 +122,24 @@ var grammar = {
             );
         }
         },
-    {"name": "properties$ebnf$1", "symbols": []},
-    {"name": "properties$ebnf$1", "symbols": ["properties$ebnf$1", "line"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "properties", "symbols": ["properties$ebnf$1", "statement"]},
-    {"name": "line", "symbols": ["statement", {"literal":"\n"}], "postprocess": nth(0)},
-    {"name": "statement", "symbols": ["assignment"], "postprocess": id},
-    {"name": "statement", "symbols": ["_", "comment"], "postprocess": commentType},
-    {"name": "statement", "symbols": ["_"], "postprocess": () => null},
-    {"name": "assignment$ebnf$1", "symbols": ["comment"], "postprocess": id},
-    {"name": "assignment$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "assignment", "symbols": ["key", {"literal":"="}, "transText", "assignment$ebnf$1"], "postprocess": assignmentType},
-    {"name": "comment", "symbols": [{"literal":"#"}, "text"], "postprocess": d => d[0] + d[1]},
-    {"name": "_$ebnf$1", "symbols": []},
-    {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", "wschar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": function(d) {return null;}},
-    {"name": "wschar", "symbols": [/[ \t]/], "postprocess": id},
-    {"name": "transText", "symbols": ["transChar", "transRest"], "postprocess": d => d[0] + d[1].join("")},
-    {"name": "transRest$ebnf$1", "symbols": []},
-    {"name": "transRest$ebnf$1", "symbols": ["transRest$ebnf$1", "transChar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "transRest", "symbols": ["transRest$ebnf$1"], "postprocess": id},
-    {"name": "transChar", "symbols": [/[^\n\t\v\f#]/], "postprocess": id},
+    {"name": "assignmentdef$ebnf$1", "symbols": ["lenghtDef"], "postprocess": id},
+    {"name": "assignmentdef$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "assignmentdef", "symbols": [{"literal":"#"}, "type", "assignmentdef$ebnf$1", {"literal":":"}, "text"], "postprocess": assingmentdefType},
+    {"name": "lenghtDef", "symbols": [{"literal":","}, "_", "unsigned_int", "_"], "postprocess": nth(2)},
+    {"name": "type$string$1", "symbols": [{"literal":"X"}, {"literal":"B"}, {"literal":"U"}, {"literal":"T"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "type", "symbols": ["type$string$1"], "postprocess": id},
+    {"name": "type$string$2", "symbols": [{"literal":"X"}, {"literal":"F"}, {"literal":"L"}, {"literal":"D"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "type", "symbols": ["type$string$2"], "postprocess": id},
     {"name": "text$ebnf$1", "symbols": []},
     {"name": "text$ebnf$1", "symbols": ["text$ebnf$1", "textChar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "text", "symbols": ["text$ebnf$1"], "postprocess": d => d[0].join("")},
     {"name": "textChar", "symbols": [/[^\n\v\f]/], "postprocess": id},
-    {"name": "key$ebnf$1", "symbols": ["char"]},
-    {"name": "key$ebnf$1", "symbols": ["key$ebnf$1", "char"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "key", "symbols": ["key$ebnf$1"], "postprocess": d => d[0].join("")},
-    {"name": "char", "symbols": [/[^\n\t\v\f ]/], "postprocess": id}
+    {"name": "_$ebnf$1", "symbols": []},
+    {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", "wschar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": function(d) {return null;}},
+    {"name": "wschar", "symbols": [/[ \t]/], "postprocess": id}
 ]
-  , ParserStart: "properties"
+  , ParserStart: "assignmentdef"
 }
 if (typeof module !== 'undefined'&& typeof module.exports !== 'undefined') {
    module.exports = grammar;

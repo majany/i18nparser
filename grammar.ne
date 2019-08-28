@@ -24,16 +24,13 @@ function assingmentdefType(d){
 }
 %}
 
-properties -> (statement "\n"):* statement
+properties -> line:* statement
+line -> statement "\n" {% nth(0) %}
 statement -> assignment {% id %}
-           | assignmentdef {% id %}
             | _ comment {% commentType %}
             | _ {% () => null %}
 
 assignment -> key "=" transText comment:? {% assignmentType %}
-assignmentdef -> "#" type lenghtDef:? ":" text {% assingmentdefType %}
-lenghtDef -> "," _  unsigned_int _ {% nth(2) %}
-
 comment -> "#" text {% d => d[0] + d[1] %}
 
 _ -> wschar:* {% function(d) {return null;} %}
@@ -49,4 +46,4 @@ textChar -> [^\n\v\f] {% id %}
 key -> char:+ {% d => d[0].join("") %} # for key may not have spaces or whitespace
 char -> [^\n\t\v\f ] {% id %}
 
-type -> "XBUT" | "XFLD"
+
