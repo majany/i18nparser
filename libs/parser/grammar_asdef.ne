@@ -66,7 +66,7 @@ type -> "XBUT" {% id %}
     | "YTXT"  {% id %} 
 
 text -> textChar:* {% d => d[0].join("") %} #for comments text. may contain spaces and tabs
-textChar -> [^\n\v\f] {% id %}
+textChar -> [^\r\n\v\f] {% id %}
 
 _ -> wschar:* {% function(d) {return null;} %}
 wschar -> [ \t] {% id %}

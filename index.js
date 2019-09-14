@@ -1,6 +1,6 @@
 const nearley = require("nearley");
-const grammar = require("./grammar.js");
-const assdefgrammar = require("./grammar_asdef");
+const grammar = require("./libs/parser/grammar.js");
+const assdefgrammar = require("./libs/parser/grammar_asdef");
 const fs = require("fs");
 
 class I18NPropertiesFile {
@@ -10,11 +10,20 @@ class I18NPropertiesFile {
         this.parserDefs = new nearley.Parser(nearley.Grammar.fromCompiled(assdefgrammar));
         this.mStartState = this.i18nParser.save();
         this.mStartStateDef = this.parserDefs.save();
-        this.mLines = [];
+        this.mFiles = {};
         this.mProperties = {};
     }
 
     addFile(sI18nFilePath) {
+        if(this.mFiles[sI18nFilePath]){
+            delete this.mFiles[sI18nFilePath];
+        }
+        let newLines = this._parseSingleFile(sI18nFilePath);
+        this.mFiles[sI18nFilePath] = newLines;
+        this._addToPropertiesBag(newLines);
+    }
+
+    _parseSingleFile(sI18nFilePath){
         const i18nFileText = fs.readFileSync(sI18nFilePath, {
             encoding: "utf-8"
         });
@@ -22,21 +31,24 @@ class I18NPropertiesFile {
         if (this.i18nParser.results.length > 1) {
             throw new Error("Fatal Error: Grammar is ambigious!");
         }
-        this.mLines = this._getPostProcessedParserResult(this.i18nParser.results);
+        let newLines = this._getPostProcessedParserResult(this.i18nParser.results, sI18nFilePath);
         this._resetParser();
-        this._addToPropertiesBag(this.mLines, sI18nFilePath);
+        return newLines;
     }
 
-    _getPostProcessedParserResult(results) {
+    _getPostProcessedParserResult(results, sI18nFilePath) {
         let result = results[0];
         let lines = result[0].slice();
         lines.push(result[1]); // add last line
-        this._parseDefinitions(lines);
+        this._parseDefinitions(lines, sI18nFilePath);
         return lines;
     }
 
-    _parseDefinitions(lines) {
+    _parseDefinitions(lines, sI18nFilePath) {
         return lines.forEach(line => {
+            if(line){
+                line.fileName = sI18nFilePath;
+            }
             if (line && line.lineType === "comment") {
                 try {
                     this.parserDefs.feed(line.text);
@@ -57,13 +69,13 @@ class I18NPropertiesFile {
         });
     }
 
-    _addToPropertiesBag(lines, sI18nFilePath) {
+    _addToPropertiesBag(lines) {
         lines.forEach((line, index) => {
             if (line && (line.lineType === "assignment")) {
-                this.mProperties[line.key] = {
+                this.mProperties[line.key] = { // possible collision of key names over multiple files
                     text: line.text,
                     line: index,
-                    fileName: sI18nFilePath
+                    fileName: line.fileName
                 };
                 let previousLine = lines[index - 1];
                 if (previousLine && previousLine.lineType === "assignmentdef") {
@@ -93,59 +105,17 @@ class I18NPropertiesFile {
     getKeyMap() {
         return this.mProperties;
     }
+    getKeys(){
+        return Object.keys(this.mProperties);
+    }
+    get(sKey){
+        return this.mProperties[sKey];
+    }
 }
 
+exports.I18NPropertiesFile = I18NPropertiesFile;
 
-const i18nPropPath = "./test.properties"
-
-let props = new I18NPropertiesFile();
-
-props.addFile(i18nPropPath);
-
-console.log(JSON.stringify(props.mLines));
-
-
-// const i18nText = fs.readFileSync(i18nPropPath, {
-//     encoding: "utf-8"
-// });
-
-// // Create a Parser object from our grammar.
-// const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
-
-// // Parse something!
-// parser.feed(i18nText);
-
-// if (parser.results.length > 1) {
-//     throw new Error("Grammar is ambigious!")
-// }
-// var res = parser.results[0]
-// var lines = res[0].slice();
-// lines.push(res[1]);
-
-
-// let parserDefs = new nearley.Parser(nearley.Grammar.fromCompiled(assdefgrammar))
-// let startState = parserDefs.save();
-
-
-// lines.forEach(line => {
-//     if (line && line.lineType === "comment") {
-//         try {
-//             parserDefs.feed(line.text);
-//             console.log("Did good!")
-//             let def = parserDefs.results[0];
-//             line.text = def.text;
-//             line.type = def.type;
-//             line.lineType = def.lineType;
-//             line.length = def.length;
-//             parserDefs.restore(startState)
-//         } catch (error) {
-//             // console.log(error.message);
-//             console.log("Did fail!");
-//             parserDefs.restore(startState);
-//             return;
-//         }
-//     }
-// });
-
-
-// console.log(lines);
+// const i18nPropPath = "./test.properties"
+// let props = new I18NPropertiesFile();
+// props.addFile(i18nPropPath);
+// console.log("done!");

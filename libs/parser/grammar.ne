@@ -25,7 +25,9 @@ function assingmentdefType(d){
 %}
 
 properties -> line:* statement
-line -> statement "\n" {% nth(0) %}
+line -> statement newline {% nth(0) %}
+newline -> "\r" "\n"
+        | "\n"
 statement -> assignment {% id %}
             | _ comment {% commentType %}
             | _ {% () => null %}
@@ -39,12 +41,12 @@ wschar -> [ \t] {% id %}
 transText -> char transRest {% d => d[0] + d[1].join("") %}
 transRest -> transChar:* {% id %}
 
-transChar -> [^\n\t\v\f#] {% id %} # for translation text. may not contain #
+transChar -> [^\r\n\t\v\f#] {% id %} # for translation text. may not contain #
 
 text -> textChar:* {% d => d[0].join("") %} #for comments text. may contain spaces and tabs
-textChar -> [^\n\v\f] {% id %}
+textChar -> [^\r\n\v\f] {% id %}
 key -> keychar:+ {% d => d[0].join("") %} # for key may not have spaces or whitespace
 keychar -> [a-zA-Z0-9_] {% id %}
-char -> [^\n\t\v\f ] {% id %}
+char -> [^\r\n\t\v\f ] {% id %}
 
 

@@ -138,7 +138,9 @@ var grammar = {
     {"name": "properties$ebnf$1", "symbols": []},
     {"name": "properties$ebnf$1", "symbols": ["properties$ebnf$1", "line"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "properties", "symbols": ["properties$ebnf$1", "statement"]},
-    {"name": "line", "symbols": ["statement", {"literal":"\n"}], "postprocess": nth(0)},
+    {"name": "line", "symbols": ["statement", "newline"], "postprocess": nth(0)},
+    {"name": "newline", "symbols": [{"literal":"\r"}, {"literal":"\n"}]},
+    {"name": "newline", "symbols": [{"literal":"\n"}]},
     {"name": "statement", "symbols": ["assignment"], "postprocess": id},
     {"name": "statement", "symbols": ["_", "comment"], "postprocess": commentType},
     {"name": "statement", "symbols": ["_"], "postprocess": () => null},
@@ -154,16 +156,16 @@ var grammar = {
     {"name": "transRest$ebnf$1", "symbols": []},
     {"name": "transRest$ebnf$1", "symbols": ["transRest$ebnf$1", "transChar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "transRest", "symbols": ["transRest$ebnf$1"], "postprocess": id},
-    {"name": "transChar", "symbols": [/[^\n\t\v\f#]/], "postprocess": id},
+    {"name": "transChar", "symbols": [/[^\r\n\t\v\f#]/], "postprocess": id},
     {"name": "text$ebnf$1", "symbols": []},
     {"name": "text$ebnf$1", "symbols": ["text$ebnf$1", "textChar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "text", "symbols": ["text$ebnf$1"], "postprocess": d => d[0].join("")},
-    {"name": "textChar", "symbols": [/[^\n\v\f]/], "postprocess": id},
+    {"name": "textChar", "symbols": [/[^\r\n\v\f]/], "postprocess": id},
     {"name": "key$ebnf$1", "symbols": ["keychar"]},
     {"name": "key$ebnf$1", "symbols": ["key$ebnf$1", "keychar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "key", "symbols": ["key$ebnf$1"], "postprocess": d => d[0].join("")},
     {"name": "keychar", "symbols": [/[a-zA-Z0-9_]/], "postprocess": id},
-    {"name": "char", "symbols": [/[^\n\t\v\f ]/], "postprocess": id}
+    {"name": "char", "symbols": [/[^\r\n\t\v\f ]/], "postprocess": id}
 ]
   , ParserStart: "properties"
 }
