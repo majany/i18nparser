@@ -21,4 +21,4 @@ declare class I18NPropertiesFile {
     getKeys(): string[];
     get(key: string): i18nValue;
 }
-export { I18NPropertiesFile };
+export { I18NPropertiesFile, i18nValue, keyDefinition };
