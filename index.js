@@ -19,16 +19,15 @@ class I18NPropertiesFile {
             encoding: "utf-8"
         });
         this.i18nParser.feed(i18nFileText);
-        this._resetParser();
-
         if (this.i18nParser.results.length > 1) {
             throw new Error("Fatal Error: Grammar is ambigious!");
         }
         this.mLines = this._getPostProcessedParserResult(this.i18nParser.results);
-        this._addToPropertiesBag(this.mLines);
+        this._resetParser();
+        this._addToPropertiesBag(this.mLines, sI18nFilePath);
     }
 
-    _getPostProcessedParserResult(results){
+    _getPostProcessedParserResult(results) {
         let result = results[0];
         let lines = result[0].slice();
         lines.push(result[1]); // add last line
@@ -36,95 +35,117 @@ class I18NPropertiesFile {
         return lines;
     }
 
-    _parseDefinitions(lines){
+    _parseDefinitions(lines) {
         return lines.forEach(line => {
             if (line && line.lineType === "comment") {
                 try {
                     this.parserDefs.feed(line.text);
-                    console.log("is a definition!")
+                    console.log("Is a definition!")
                     let def = this.parserDefs.results[0];
                     line.text = def.text;
                     line.type = def.type;
                     line.lineType = def.lineType;
                     line.length = def.length;
-                    this.parserDefs.restore(this.mStartStateDef)
+                    this._resetDefParser();
                 } catch (error) {
                     console.log("Is not a definition!");
                     // TODO: find out where the error is and save it
-                    this.parserDefs.restore(this.mStartStateDef);
+                    this._resetDefParser();
                     return;
                 }
             }
         });
     }
 
-    _addToPropertiesBag(lines) {
-        lines.forEach( (line, index) => {
-            if(line.lineType === "assignment"){
+    _addToPropertiesBag(lines, sI18nFilePath) {
+        lines.forEach((line, index) => {
+            if (line && (line.lineType === "assignment")) {
                 this.mProperties[line.key] = {
                     text: line.text,
                     line: index,
-                    fileName: "TODO: insert name"
+                    fileName: sI18nFilePath
                 };
-                // TODO: check line before for definition
+                let previousLine = lines[index - 1];
+                if (previousLine && previousLine.lineType === "assignmentdef") {
+                    this.mProperties[line.key].def = previousLine;
+                }
             }
         });
     }
 
     clear() {
         this.mProperties = {};
+        this.mLines = [];
     }
 
     _resetParser() {
         this.i18nParser.restore(this.mStartState);
     }
+
+    _resetDefParser() {
+        this.parserDefs.restore(this.mStartStateDef);
+    }
+
+    getLines() {
+        return this.mLines.slice();
+    }
+
+    getKeyMap() {
+        return this.mProperties;
+    }
 }
-
-
 
 
 const i18nPropPath = "./test.properties"
-const i18nText = fs.readFileSync(i18nPropPath, {
-    encoding: "utf-8"
-});
 
-// Create a Parser object from our grammar.
-const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+let props = new I18NPropertiesFile();
 
-// Parse something!
-parser.feed(i18nText);
+props.addFile(i18nPropPath);
 
-if (parser.results.length > 1) {
-    throw new Error("Grammar is ambigious!")
-}
-var res = parser.results[0]
-var lines = res[0].slice();
-lines.push(res[1]);
+console.log(JSON.stringify(props.mLines));
 
 
-let parserDefs = new nearley.Parser(nearley.Grammar.fromCompiled(assdefgrammar))
-let startState = parserDefs.save();
+// const i18nText = fs.readFileSync(i18nPropPath, {
+//     encoding: "utf-8"
+// });
+
+// // Create a Parser object from our grammar.
+// const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+
+// // Parse something!
+// parser.feed(i18nText);
+
+// if (parser.results.length > 1) {
+//     throw new Error("Grammar is ambigious!")
+// }
+// var res = parser.results[0]
+// var lines = res[0].slice();
+// lines.push(res[1]);
 
 
-lines.forEach(line => {
-    if (line && line.lineType === "comment") {
-        try {
-            parserDefs.feed(line.text);
-            console.log("Did good!")
-            let def = parserDefs.results[0];
-            line.text = def.text;
-            line.type = def.type;
-            line.lineType = def.lineType;
-            line.length = def.length;
-            parserDefs.restore(startState)
-        } catch (error) {
-            // console.log(error.message);
-            console.log("Did fail!");
-            parserDefs.restore(startState);
-            return;
-        }
-    }
-});
+// let parserDefs = new nearley.Parser(nearley.Grammar.fromCompiled(assdefgrammar))
+// let startState = parserDefs.save();
 
 
-console.log(lines);
+// lines.forEach(line => {
+//     if (line && line.lineType === "comment") {
+//         try {
+//             parserDefs.feed(line.text);
+//             console.log("Did good!")
+//             let def = parserDefs.results[0];
+//             line.text = def.text;
+//             line.type = def.type;
+//             line.lineType = def.lineType;
+//             line.length = def.length;
+//             parserDefs.restore(startState)
+//         } catch (error) {
+//             // console.log(error.message);
+//             console.log("Did fail!");
+//             parserDefs.restore(startState);
+//             return;
+//         }
+//     }
+// });
+
+
+// console.log(lines);
