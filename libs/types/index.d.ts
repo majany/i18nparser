@@ -15,7 +15,7 @@ type i18nValue = {
 
 declare class I18NPropertiesFile {
     constructor();
-    addFile(file: string): void;
+    addFile(file: string): Error;
     clear(): void;
     getKeyMap(): object;
     getKeys(): string[];

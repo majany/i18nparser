@@ -18,7 +18,14 @@ class I18NPropertiesFile {
         if(this.mFiles[sI18nFilePath]){
             delete this.mFiles[sI18nFilePath];
         }
-        let newLines = this._parseSingleFile(sI18nFilePath);
+        let newLines;
+        try {
+           newLines = this._parseSingleFile(sI18nFilePath);
+        } catch (error) {
+            this._resetParser();
+           return error; 
+        }
+     
         this.mFiles[sI18nFilePath] = newLines;
         this._addToPropertiesBag(newLines);
     }
@@ -29,6 +36,7 @@ class I18NPropertiesFile {
         });
         this.i18nParser.feed(i18nFileText);
         if (this.i18nParser.results.length > 1) {
+            this._resetParser();
             throw new Error("Fatal Error: Grammar is ambigious!");
         }
         let newLines = this._getPostProcessedParserResult(this.i18nParser.results, sI18nFilePath);
