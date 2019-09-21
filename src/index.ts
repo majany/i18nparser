@@ -50,7 +50,7 @@ interface I18nValue {
 
 type i18nPropertiesBag = { [key: string]: I18nValue };
 
-class I18NPropertiesFile {
+export class I18NPropertiesFile {
 
 
     private i18nParser: Parser;
@@ -91,7 +91,7 @@ class I18NPropertiesFile {
         this._constructMergedFileBag();
     }
 
-    _constructMergedFileBag(){
+    private _constructMergedFileBag(){
         // reconstructs whole properties bag because of possible key collision
         this.mProperties = {};
         for (const sFileName in this.mFileBags) {
@@ -100,7 +100,7 @@ class I18NPropertiesFile {
         }
     }
 
-    _parseSingleFile(sI18nFilePath: string) {
+    private _parseSingleFile(sI18nFilePath: string) {
         const i18nFileText = fs.readFileSync(sI18nFilePath, {
             encoding: "utf-8"
         });
@@ -114,7 +114,7 @@ class I18NPropertiesFile {
         return newLines;
     }
 
-    _getPostProcessedParserResult(parserResults: Array<i18nParserResult>, sI18nFilePath: string) {
+    private _getPostProcessedParserResult(parserResults: Array<i18nParserResult>, sI18nFilePath: string) {
         let result = parserResults[0];
         let lines = (result[0] as ResultLine[]).slice();
         let lastLine = result[1] as ResultLine;
@@ -124,7 +124,7 @@ class I18NPropertiesFile {
         return lines;
     }
 
-    _parseDefinitions(lines: ResultLine[], sI18nFilePath: string) {
+    private _parseDefinitions(lines: ResultLine[], sI18nFilePath: string) {
         return lines.forEach(line => {
             if (line) {
                 line.fileName = sI18nFilePath;
@@ -177,11 +177,11 @@ class I18NPropertiesFile {
         this.mFiles = {};
     }
 
-    _resetParser() {
+    private _resetParser() {
         this.i18nParser.restore(this.mStartState);
     }
 
-    _resetDefParser() {
+    private _resetDefParser() {
         this.parserDefs.restore(this.mStartStateDef);
     }
 
@@ -208,12 +208,11 @@ class I18NPropertiesFile {
     }
 }
 
-exports.I18NPropertiesFile = I18NPropertiesFile;
 
-const i18nPropPath = "./test.properties";
-const i18nPropPathCopy = "./test_copy.properties";
-let props = new I18NPropertiesFile();
-props.addFile(i18nPropPath);
-props.addFile(i18nPropPathCopy);
-props.removeFile(i18nPropPathCopy);
-console.log("done!");
+// const i18nPropPath = "./test.properties";
+// const i18nPropPathCopy = "./test_copy.properties";
+// let props = new I18NPropertiesFile();
+// props.addFile(i18nPropPath);
+// props.addFile(i18nPropPathCopy);
+// props.removeFile(i18nPropPathCopy);
+// console.log("done!");

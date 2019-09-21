@@ -6,8 +6,8 @@
 		"lib": [
 			"es6"
 		],
-		"allowJs": true,
 		"sourceMap": true,
+		"allowJs": true,
 		"rootDir": "src",
 		"strict": true   /* enable all strict type-checking options */
 		/* Additional Checks */
