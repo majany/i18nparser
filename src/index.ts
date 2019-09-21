@@ -46,6 +46,7 @@ interface I18nValue {
     line: number;
     fileName: string;
     def?: AssignmentDefinitionLine;
+    duplicateOf?: string;
 }
 
 type i18nPropertiesBag = { [key: string]: I18nValue };
@@ -153,11 +154,21 @@ export class I18NPropertiesFile {
         lines.forEach((line, index) => {
             if (line && (line.lineType === "assignment")) {
                 let assignmentLine = line as AssignmentLine;
-                bag[assignmentLine.key] = {
+
+                let newEntry : I18nValue = { 
                     text: assignmentLine.text,
                     line: index,
                     fileName: assignmentLine.fileName as string
                 };
+
+                if(bag[assignmentLine.key]){
+                    // duplicate in same file possible
+                    let original = assignmentLine.key;
+                    assignmentLine.key = assignmentLine.key + "_duplicate_" + Math.floor((Math.random() * Number.MAX_SAFE_INTEGER));
+                    newEntry.duplicateOf = original;
+                }
+
+                bag[assignmentLine.key] = newEntry;
                 let previousLine = lines[index - 1];
                 if (previousLine && previousLine.lineType === "assignmentdef") {
                     bag[assignmentLine.key].def = previousLine as AssignmentDefinitionLine;
@@ -209,10 +220,10 @@ export class I18NPropertiesFile {
 }
 
 
-// const i18nPropPath = "./test.properties";
-// const i18nPropPathCopy = "./test_copy.properties";
-// let props = new I18NPropertiesFile();
-// props.addFile(i18nPropPath);
-// props.addFile(i18nPropPathCopy);
-// props.removeFile(i18nPropPathCopy);
-// console.log("done!");
+const i18nPropPath = "./test.properties";
+const i18nPropPathCopy = "./test_copy.properties";
+let props = new I18NPropertiesFile();
+props.addFile(i18nPropPath);
+props.addFile(i18nPropPathCopy);
+props.removeFile(i18nPropPathCopy);
+console.log("done!");

@@ -4,7 +4,7 @@
   "description": "",
   "main": "./out/index.js",
   "scripts": {
-    "compile": "rm -r out && tsc -p ./",
+    "compile": "rm -r out && tsc -p ./ && cp src/index.d.ts out",
     "watch": "tsc -watch -p ./"
   },
   "author": "majany",

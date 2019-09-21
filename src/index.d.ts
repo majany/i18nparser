@@ -19,11 +19,12 @@ interface AssignmentDefinitionLine extends StatementLine {
     length: number;
     text: string;
 }
-interface I18nValue {
+export interface I18nValue {
     text: string;
     line: number;
     fileName: string;
     def?: AssignmentDefinitionLine;
+    duplicateOf?: string;
 }
 declare type i18nPropertiesBag = {
     [key: string]: I18nValue;
