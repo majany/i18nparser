@@ -4,6 +4,11 @@ declare enum LineType {
     comment = "comment"
 }
 declare type ResultLine = StatementLine | null;
+declare type ParserError = {
+    message: string;
+    token: any;
+    offset: number;
+};
 interface StatementLine {
     lineType: LineType;
     fileName?: string;
@@ -12,6 +17,7 @@ interface StatementLine {
     length?: number;
     text?: string;
     key?: string;
+    defError?: ParserError;
 }
 interface AssignmentDefinitionLine extends StatementLine {
     lineType: LineType.assignmentdef;
@@ -25,6 +31,7 @@ export interface I18nValue {
     fileName: string;
     def?: AssignmentDefinitionLine;
     duplicateOf?: string;
+    defError?: ParserError;
 }
 declare type i18nPropertiesBag = {
     [key: string]: I18nValue;

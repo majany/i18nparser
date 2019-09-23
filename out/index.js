@@ -82,7 +82,7 @@ class I18NPropertiesFile {
                     line.length = parsedLine.length;
                 }
                 catch (error) {
-                    // TODO: save error
+                    line.defError = error;
                     return;
                 }
                 finally {
@@ -109,8 +109,13 @@ class I18NPropertiesFile {
                 }
                 bag[assignmentLine.key] = newEntry;
                 let previousLine = lines[index - 1];
-                if (previousLine && previousLine.lineType === "assignmentdef") {
-                    bag[assignmentLine.key].def = previousLine;
+                if (previousLine) {
+                    if (previousLine.lineType === LineType.assignmentdef) {
+                        bag[assignmentLine.key].def = previousLine;
+                    }
+                    else if (previousLine.lineType === LineType.comment) {
+                        bag[assignmentLine.key].defError = previousLine.defError;
+                    }
                 }
                 if (addToGlobal) {
                     // possible collision of key names over multiple files

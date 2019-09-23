@@ -11,6 +11,12 @@ enum LineType {
 
 type ResultLine = StatementLine | null;
 
+type ParserError = {
+    message: string;
+    token: any;
+    offset: number;
+};
+
 interface StatementLine {
     lineType: LineType;
     fileName?: string;
@@ -19,11 +25,13 @@ interface StatementLine {
     length?: number;
     text?: string;
     key?: string;
+    defError?: ParserError;
 }
 
 interface CommentLine extends StatementLine {
     lineType: LineType.comment;
     text: string;
+    defError?: ParserError;
 }
 
 interface AssignmentLine extends StatementLine {
@@ -47,6 +55,7 @@ interface I18nValue {
     fileName: string;
     def?: AssignmentDefinitionLine;
     duplicateOf?: string;
+    defError?: ParserError;
 }
 
 type i18nPropertiesBag = { [key: string]: I18nValue };
@@ -140,7 +149,7 @@ export class I18NPropertiesFile {
                     line.length = parsedLine.length;
 
                 } catch (error) {
-                    // TODO: save error
+                    line.defError = error as ParserError;
                     return;
                 } finally {
                     this._resetDefParser();
@@ -170,8 +179,12 @@ export class I18NPropertiesFile {
 
                 bag[assignmentLine.key] = newEntry;
                 let previousLine = lines[index - 1];
-                if (previousLine && previousLine.lineType === "assignmentdef") {
-                    bag[assignmentLine.key].def = previousLine as AssignmentDefinitionLine;
+                if (previousLine ) {
+                    if(previousLine.lineType === LineType.assignmentdef){
+                        bag[assignmentLine.key].def = previousLine as AssignmentDefinitionLine;
+                    } else if(previousLine.lineType === LineType.comment){
+                        bag[assignmentLine.key].defError = previousLine.defError;
+                    }
                 }
                 if (addToGlobal) {
                     // possible collision of key names over multiple files
@@ -220,10 +233,10 @@ export class I18NPropertiesFile {
 }
 
 
-const i18nPropPath = "./test.properties";
-const i18nPropPathCopy = "./test_copy.properties";
-let props = new I18NPropertiesFile();
-props.addFile(i18nPropPath);
-props.addFile(i18nPropPathCopy);
-props.removeFile(i18nPropPathCopy);
-console.log("done!");
+// const i18nPropPath = "./test.properties";
+// const i18nPropPathCopy = "./test_copy.properties";
+// let props = new I18NPropertiesFile();
+// props.addFile(i18nPropPath);
+// props.addFile(i18nPropPathCopy);
+// props.removeFile(i18nPropPathCopy);
+// console.log("done!");

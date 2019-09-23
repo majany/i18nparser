@@ -46,7 +46,7 @@ transChar -> [^\r\n\t\v\f#] {% id %} # for translation text. may not contain #
 text -> textChar:* {% d => d[0].join("") %} #for comments text. may contain spaces and tabs
 textChar -> [^\r\n\v\f] {% id %}
 key -> keychar:+ {% d => d[0].join("") %} # for key may not have spaces or whitespace
-keychar -> [a-zA-Z0-9_] {% id %}
+keychar -> [a-zA-Z0-9_|] {% id %}
 char -> [^\r\n\t\v\f ] {% id %}
 
 
