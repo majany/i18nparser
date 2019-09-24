@@ -149,7 +149,7 @@
             { "name": "key$ebnf$1", "symbols": ["keychar"] },
             { "name": "key$ebnf$1", "symbols": ["key$ebnf$1", "keychar"], "postprocess": function arrpush(d) { return d[0].concat([d[1]]); } },
             { "name": "key", "symbols": ["key$ebnf$1"], "postprocess": d => d[0].join("") },
-            { "name": "keychar", "symbols": [/[a-zA-Z0-9_|]/], "postprocess": id },
+            { "name": "keychar", "symbols": [/[a-zA-Z0-9_|.-]/], "postprocess": id },
             { "name": "char", "symbols": [/[^\r\n\t\v\f ]/], "postprocess": id }
         ],
         ParserStart: "properties"
