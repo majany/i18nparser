@@ -1,9 +1,10 @@
 declare enum LineType {
     assignment = "assignment",
     assignmentdef = "assignmentdef",
-    comment = "comment"
+    comment = "comment",
+    error = "error"
 }
-declare type ResultLine = StatementLine | null;
+export declare type ResultLine = StatementLine | null;
 declare type ParserError = {
     message: string;
     token: any;
@@ -18,6 +19,7 @@ interface StatementLine {
     text?: string;
     key?: string;
     defError?: ParserError;
+    error?: ParserError;
 }
 interface AssignmentDefinitionLine extends StatementLine {
     lineType: LineType.assignmentdef;
@@ -32,6 +34,7 @@ export interface I18nValue {
     def?: AssignmentDefinitionLine;
     duplicateOf?: string;
     defError?: ParserError;
+    error?: ParserError;
 }
 declare type i18nPropertiesBag = {
     [key: string]: I18nValue;
@@ -49,7 +52,6 @@ export declare class I18NPropertiesFile {
     removeFile(sI18nFilePath: string): void;
     private _constructMergedFileBag;
     private _parseSingleFile;
-    private _getPostProcessedParserResult;
     private _parseDefinitions;
     makePropertiesBag(lines: ResultLine[], addToGlobal?: boolean): i18nPropertiesBag;
     clear(): void;
@@ -60,5 +62,6 @@ export declare class I18NPropertiesFile {
     get(sKey: string): I18nValue;
     getFromFile(sKey: string, sI18nFilePath: string): I18nValue | undefined;
     getKeysFromFile(sI18nFilePath: string): string[] | undefined;
+    getErrorLines(sI18nFilePath: string): ResultLine[] | undefined;
 }
 export {};

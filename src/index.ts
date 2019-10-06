@@ -6,7 +6,8 @@ import * as fs from 'fs';
 enum LineType {
     assignment = "assignment",
     assignmentdef = "assignmentdef",
-    comment = "comment"
+    comment = "comment",
+    error = "error"
 }
 
 type ResultLine = StatementLine | null;
@@ -26,6 +27,7 @@ interface StatementLine {
     text?: string;
     key?: string;
     defError?: ParserError;
+    error?: ParserError;
 }
 
 interface CommentLine extends StatementLine {
@@ -47,6 +49,12 @@ interface AssignmentDefinitionLine extends StatementLine {
     text: string;
 }
 
+interface ErrorLine extends StatementLine {
+    lineType: LineType.error;
+    error: ParserError;
+}
+
+
 type i18nParserResult = Array<ResultLine[] | ResultLine>;
 
 interface I18nValue {
@@ -56,6 +64,7 @@ interface I18nValue {
     def?: AssignmentDefinitionLine;
     duplicateOf?: string;
     defError?: ParserError;
+    error?: ParserError;
 }
 
 type i18nPropertiesBag = { [key: string]: I18nValue };
@@ -101,7 +110,7 @@ export class I18NPropertiesFile {
         this._constructMergedFileBag();
     }
 
-    private _constructMergedFileBag(){
+    private _constructMergedFileBag() {
         // reconstructs whole properties bag because of possible key collision
         this.mProperties = {};
         for (const sFileName in this.mFileBags) {
@@ -114,25 +123,36 @@ export class I18NPropertiesFile {
         const i18nFileText = fs.readFileSync(sI18nFilePath, {
             encoding: "utf-8"
         });
-        this.i18nParser.feed(i18nFileText);
-        if (this.i18nParser.results.length > 1) {
+
+        const fileLines = i18nFileText.split(/\r\n|\r|\n/);
+
+        const parsedLines = fileLines.map((line, index) => {
+            if (!line) {
+                return null;
+            }
+            try {
+                this.i18nParser.feed(line);
+            } catch (error) {
+                this._resetParser();
+                return {
+                    lineType: LineType.error,
+                    error: error as ParserError,
+                    line: index
+                } as ErrorLine;
+            }
+            if (this.i18nParser.results.length > 1) {
+                this._resetParser();
+                throw new Error("Fatal Error: Grammar is ambigious!");
+            }
+            let res = this.i18nParser.results[0];
             this._resetParser();
-            throw new Error("Fatal Error: Grammar is ambigious!");
-        }
-        let newLines = this._getPostProcessedParserResult(this.i18nParser.results, sI18nFilePath);
-        this._resetParser();
-        return newLines;
+            return res[1] as ResultLine; // single line result;
+        });
+
+        this._parseDefinitions(parsedLines, sI18nFilePath);
+        return parsedLines;
     }
 
-    private _getPostProcessedParserResult(parserResults: Array<i18nParserResult>, sI18nFilePath: string) {
-        let result = parserResults[0];
-        let lines = (result[0] as ResultLine[]).slice();
-        let lastLine = result[1] as ResultLine;
-        lines.push(lastLine);
-
-        this._parseDefinitions(lines, sI18nFilePath);
-        return lines;
-    }
 
     private _parseDefinitions(lines: ResultLine[], sI18nFilePath: string) {
         return lines.forEach(line => {
@@ -164,13 +184,13 @@ export class I18NPropertiesFile {
             if (line && (line.lineType === "assignment")) {
                 let assignmentLine = line as AssignmentLine;
 
-                let newEntry : I18nValue = { 
+                let newEntry: I18nValue = {
                     text: assignmentLine.text,
                     line: index,
                     fileName: assignmentLine.fileName as string
                 };
 
-                if(bag[assignmentLine.key]){
+                if (bag[assignmentLine.key]) {
                     // duplicate in same file possible
                     let original = assignmentLine.key;
                     assignmentLine.key = assignmentLine.key + "_duplicate_" + Math.floor((Math.random() * Number.MAX_SAFE_INTEGER));
@@ -179,10 +199,10 @@ export class I18NPropertiesFile {
 
                 bag[assignmentLine.key] = newEntry;
                 let previousLine = lines[index - 1];
-                if (previousLine ) {
-                    if(previousLine.lineType === LineType.assignmentdef){
+                if (previousLine) {
+                    if (previousLine.lineType === LineType.assignmentdef) {
                         bag[assignmentLine.key].def = previousLine as AssignmentDefinitionLine;
-                    } else if(previousLine.lineType === LineType.comment){
+                    } else if (previousLine.lineType === LineType.comment) {
                         bag[assignmentLine.key].defError = previousLine.defError;
                     }
                 }
@@ -221,14 +241,19 @@ export class I18NPropertiesFile {
         return this.mProperties[sKey];
     }
 
-    getFromFile(sKey: string, sI18nFilePath : string) : I18nValue | undefined {
+    getFromFile(sKey: string, sI18nFilePath: string): I18nValue | undefined {
         const bag = this.mFileBags[sI18nFilePath];
         return bag && bag[sKey];
     }
 
-    getKeysFromFile(sI18nFilePath : string) : string[] | undefined {
+    getKeysFromFile(sI18nFilePath: string): string[] | undefined {
         const bag = this.mFileBags[sI18nFilePath];
         return bag && Object.keys(bag);
+    }
+
+    getErrorLines(sI18nFilePath: string) : ResultLine[] | undefined {
+        const bag = this.mFiles[sI18nFilePath];
+        return bag && bag.filter( line => line && line.lineType === LineType.error);
     }
 }
 

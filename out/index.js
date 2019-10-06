@@ -9,6 +9,7 @@ var LineType;
     LineType["assignment"] = "assignment";
     LineType["assignmentdef"] = "assignmentdef";
     LineType["comment"] = "comment";
+    LineType["error"] = "error";
 })(LineType || (LineType = {}));
 class I18NPropertiesFile {
     constructor() {
@@ -50,22 +51,32 @@ class I18NPropertiesFile {
         const i18nFileText = fs.readFileSync(sI18nFilePath, {
             encoding: "utf-8"
         });
-        this.i18nParser.feed(i18nFileText);
-        if (this.i18nParser.results.length > 1) {
+        const fileLines = i18nFileText.split(/\r\n|\r|\n/);
+        const parsedLines = fileLines.map((line, index) => {
+            if (!line) {
+                return null;
+            }
+            try {
+                this.i18nParser.feed(line);
+            }
+            catch (error) {
+                this._resetParser();
+                return {
+                    lineType: LineType.error,
+                    error: error,
+                    line: index
+                };
+            }
+            if (this.i18nParser.results.length > 1) {
+                this._resetParser();
+                throw new Error("Fatal Error: Grammar is ambigious!");
+            }
+            let res = this.i18nParser.results[0];
             this._resetParser();
-            throw new Error("Fatal Error: Grammar is ambigious!");
-        }
-        let newLines = this._getPostProcessedParserResult(this.i18nParser.results, sI18nFilePath);
-        this._resetParser();
-        return newLines;
-    }
-    _getPostProcessedParserResult(parserResults, sI18nFilePath) {
-        let result = parserResults[0];
-        let lines = result[0].slice();
-        let lastLine = result[1];
-        lines.push(lastLine);
-        this._parseDefinitions(lines, sI18nFilePath);
-        return lines;
+            return res[1]; // single line result;
+        });
+        this._parseDefinitions(parsedLines, sI18nFilePath);
+        return parsedLines;
     }
     _parseDefinitions(lines, sI18nFilePath) {
         return lines.forEach(line => {
@@ -153,13 +164,17 @@ class I18NPropertiesFile {
         const bag = this.mFileBags[sI18nFilePath];
         return bag && Object.keys(bag);
     }
+    getErrorLines(sI18nFilePath) {
+        const bag = this.mFiles[sI18nFilePath];
+        return bag && bag.filter(line => line && line.lineType === LineType.error);
+    }
 }
 exports.I18NPropertiesFile = I18NPropertiesFile;
-const i18nPropPath = "./test.properties";
-const i18nPropPathCopy = "./test_copy.properties";
-let props = new I18NPropertiesFile();
-props.addFile(i18nPropPath);
-props.addFile(i18nPropPathCopy);
-props.removeFile(i18nPropPathCopy);
-console.log("done!");
+// const i18nPropPath = "./test.properties";
+// const i18nPropPathCopy = "./test_copy.properties";
+// let props = new I18NPropertiesFile();
+// props.addFile(i18nPropPath);
+// props.addFile(i18nPropPathCopy);
+// props.removeFile(i18nPropPathCopy);
+// console.log("done!");
 //# sourceMappingURL=index.js.map
