@@ -18,7 +18,7 @@ type ParserError = {
     offset: number;
 };
 
-interface StatementLine {
+export interface StatementLine {
     lineType: LineType;
     fileName?: string;
     line?: number;
@@ -57,7 +57,7 @@ interface ErrorLine extends StatementLine {
 
 type i18nParserResult = Array<ResultLine[] | ResultLine>;
 
-interface I18nValue {
+export interface I18nValue {
     text: string;
     line: number;
     fileName: string;
