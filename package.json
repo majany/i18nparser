@@ -2,7 +2,7 @@
   "name": "i18nparser",
   "version": "0.2.0",
   "description": "",
-  "main": "./out/src/index.ts",
+  "main": "./out/src/index.js",
   "scripts": {
     "compile": "rm -fr out && tsc -p ./ && cp src/index.d.ts out/src",
     "watch": "tsc -watch -p ./",
