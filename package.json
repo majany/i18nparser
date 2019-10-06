@@ -2,9 +2,9 @@
   "name": "i18nparser",
   "version": "0.2.0",
   "description": "",
-  "main": "./out/index.js",
+  "main": "./out/src/index.ts",
   "scripts": {
-    "compile": "rm -r out && tsc -p ./ && cp src/index.d.ts out",
+    "compile": "rm -fr out && tsc -p ./ && cp src/index.d.ts out/src",
     "watch": "tsc -watch -p ./",
     "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
     "coverage": "nyc -r html -r text -e .ts -x \"src/spec/*.ts\" -x \"src/libs/*\" npm run test"
@@ -12,11 +12,10 @@
   "author": "majany",
   "license": "ISC",
   "dependencies": {
-    "nearley": "^2.18.0",
-    "nyc": "^14.1.1",
-    "only": "0.0.2"
+    "nearley": "^2.18.0"
   },
   "devDependencies": {
+    "nyc": "^14.1.1",
     "ts-node": "^8.4.1",
     "@types/jasmine": "^3.4.2",
     "jasmine": "^3.5.0",
@@ -25,7 +24,7 @@
     "typescript": "^3.6.3",
     "tslint": "^5.20.0"
   },
-  "typings": "./out/index.d.ts",
+  "typings": "./out/src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/majany/i18nparser.git"
