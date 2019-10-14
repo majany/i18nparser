@@ -255,6 +255,10 @@ export class I18NPropertiesFile {
         const bag = this.mFiles[sI18nFilePath];
         return bag && bag.filter( line => line && line.lineType === LineType.error);
     }
+
+    getContainedFiles() : string[]{
+        return Object.keys(this.mFiles);
+    }
 }
 
 

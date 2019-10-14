@@ -4,6 +4,7 @@ describe("I18NPropertiesFile", function () {
   let propertiesFile: I18NPropertiesFile;
   const i18ntestFilesPath = "./test/spec/test.properties";
   const i18ntestFiles2Path = "./test/spec/test_copy.properties";
+  const i18ntesFilesEmptyPath = "./test/spec/test2.properties";
   const propertyKeys = [
     "blup",
     "blap",
@@ -23,6 +24,21 @@ describe("I18NPropertiesFile", function () {
   it("should be able to add a file", function () {
     expect(propertiesFile.getKeys().length).toBe(10);
     expect(propertiesFile.getKeys()).toEqual(jasmine.arrayContaining(propertyKeys));
+  });
+
+  it("should be able to get the added file path", function () {
+    expect(propertiesFile.getContainedFiles().length).toBe(1);
+    expect(propertiesFile.getContainedFiles()[0]).toBe(i18ntestFilesPath);
+  });
+
+  it("should be able to add an empty file", function () {
+    propertiesFile.addFile(i18ntesFilesEmptyPath);
+    expect(propertiesFile.getKeys().length).toBe(10);
+    expect(propertiesFile.getContainedFiles().length).toBe(2);
+    expect(propertiesFile.getContainedFiles()).toEqual(jasmine.arrayWithExactContents([
+      i18ntestFilesPath,
+      i18ntesFilesEmptyPath
+    ]));
   });
 
   it("should be able to get the value of a key", function () {
