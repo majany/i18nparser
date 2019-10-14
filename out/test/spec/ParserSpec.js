@@ -28,6 +28,14 @@ describe("I18NPropertiesFile", function () {
         expect(propertiesFile.getContainedFiles().length).toBe(1);
         expect(propertiesFile.getContainedFiles()[0]).toBe(i18ntestFilesPath);
     });
+    it("should be able to get a result line by number and path", function () {
+        const sixthLine = propertiesFile.getLine(i18ntestFilesPath, 5);
+        expect(sixthLine).toEqual(jasmine.objectContaining({
+            lineType: "assignmentdef",
+            text: " hallo test",
+            length: 4
+        }));
+    });
     it("should be able to add an empty file", function () {
         propertiesFile.addFile(i18ntesFilesEmptyPath);
         expect(propertiesFile.getKeys().length).toBe(10);

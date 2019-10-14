@@ -64,5 +64,6 @@ export declare class I18NPropertiesFile {
     getKeysFromFile(sI18nFilePath: string): string[] | undefined;
     getErrorLines(sI18nFilePath: string): ResultLine[] | undefined;
     getContainedFiles(): string[];
+    getLine(sI18nFilePath: string, line: number): ResultLine;
 }
 export {};

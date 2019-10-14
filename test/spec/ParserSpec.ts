@@ -1,4 +1,4 @@
-import { I18NPropertiesFile, StatementLine, I18nValue } from "../../src/index";
+import { I18NPropertiesFile, StatementLine, I18nValue, ResultLine } from "../../src/index";
 
 describe("I18NPropertiesFile", function () {
   let propertiesFile: I18NPropertiesFile;
@@ -29,6 +29,15 @@ describe("I18NPropertiesFile", function () {
   it("should be able to get the added file path", function () {
     expect(propertiesFile.getContainedFiles().length).toBe(1);
     expect(propertiesFile.getContainedFiles()[0]).toBe(i18ntestFilesPath);
+  });
+
+  it("should be able to get a result line by number and path", function () {
+    const sixthLine = propertiesFile.getLine(i18ntestFilesPath, 5);
+    expect(sixthLine).toEqual(jasmine.objectContaining({
+      lineType: "assignmentdef",
+      text: " hallo test",
+      length: 4
+    }));
   });
 
   it("should be able to add an empty file", function () {

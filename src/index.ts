@@ -10,7 +10,7 @@ enum LineType {
     error = "error"
 }
 
-type ResultLine = StatementLine | null;
+export type ResultLine = StatementLine | null;
 
 type ParserError = {
     message: string;
@@ -254,6 +254,11 @@ export class I18NPropertiesFile {
     getErrorLines(sI18nFilePath: string) : ResultLine[] | undefined {
         const bag = this.mFiles[sI18nFilePath];
         return bag && bag.filter( line => line && line.lineType === LineType.error);
+    }
+
+    getLine(sI18nFilePath: string, line: number) : ResultLine | undefined {
+        const bag = this.mFiles[sI18nFilePath];
+        return bag[line];
     }
 
     getContainedFiles() : string[]{

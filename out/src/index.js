@@ -168,6 +168,10 @@ class I18NPropertiesFile {
         const bag = this.mFiles[sI18nFilePath];
         return bag && bag.filter(line => line && line.lineType === LineType.error);
     }
+    getLine(sI18nFilePath, line) {
+        const bag = this.mFiles[sI18nFilePath];
+        return bag[line];
+    }
     getContainedFiles() {
         return Object.keys(this.mFiles);
     }
