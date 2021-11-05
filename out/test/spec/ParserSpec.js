@@ -33,7 +33,7 @@ describe("I18NPropertiesFile", function () {
         expect(sixthLine).toEqual(jasmine.objectContaining({
             lineType: "assignmentdef",
             text: " hallo test",
-            length: 4
+            length: 2
         }));
     });
     it("should be able to add an empty file", function () {
